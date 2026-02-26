@@ -89,6 +89,7 @@ public class SwerveModule {
         .voltageCompensation(Constants.SwerveConstants.voltageComp);
         driveConfig.smartCurrentLimit(Constants.SwerveConstants.driveContinuousCurrentLimit)
         .voltageCompensation(Constants.SwerveConstants.voltageComp);
+        
 
 
         angleEncoder = new CANcoder(moduleConstants.cancoderID);
@@ -96,6 +97,7 @@ public class SwerveModule {
         configAngleEncoder();
 
         angleMotor = new SparkMax(moduleConstants.angleMotorID, MotorType.kBrushless);
+        
         integratedAngleEncoder = angleMotor.getEncoder();
         angleController = angleMotor.getClosedLoopController();
     // Do NOT reassign angleConfig here; it was configured above with PID and encoder
@@ -133,6 +135,12 @@ public class SwerveModule {
         // If the dot product is negative, reversing the wheel direction may be beneficial
         return deltaDirection < 0;
     }
+    /** Normalize angle (degrees) to range (-180, 180] */
+    private double wrapDegTo180(double angle) {
+        double a = ((angle + 180.0) % 360.0);
+        if (a < 0) a += 360.0;
+        return a - 180.0;
+    }
 
     public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop) {
         // Custom optimize command, since default WPILib optimize assumes continuous
@@ -140,7 +148,7 @@ public class SwerveModule {
         // REV supports this now so dont have to worry with rev, but need some funky
         // configs i dont want to do
         // have to be sad with falcons but thats what you get for giving money to Tony
-        desiredState.optimize(getAngle());
+        desiredState.optimize(getState().angle);
         setAngle(desiredState);
         setSpeed(desiredState, isOpenLoop);
     }
@@ -160,18 +168,24 @@ public class SwerveModule {
     }
 }
     public void setAngle(SwerveModuleState desiredState) {
-        // Prevent rotating module if speed is less then 1%. Prevents Jittering.
-        SmartDashboard.putNumber("last angle", lastAngle.getDegrees());
-        SmartDashboard.putNumber("desired angle", desiredState.angle.getDegrees());
+        // read continuous encoder position (degrees)
+        double currentDeg = integratedAngleEncoder.getPosition();
 
-        Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (Constants.SwerveConstants.maxSpeed * 0.01))
-                ? lastAngle
-                : desiredState.angle;
+        // desired angle from WPILib SwerveModuleState (degrees)
+        double desiredDeg = desiredState.angle.getDegrees(); // ensure this is in -180..180 or 0..360
 
+        // compute minimal delta and continuous setpoint
+        double delta = wrapDegTo180(desiredDeg - currentDeg);
+        double setpointDeg = currentDeg + delta;
 
-    // The encoder position conversion factor is configured to return degrees, so
-    // pass degrees into the closed-loop controller rather than rotations.
-        angleController.setSetpoint(angle.getDegrees(), ControlType.kPosition, ClosedLoopSlot.kSlot0);
+        // optional deadband to avoid jitter for tiny deltas
+        final double deadbandDeg = 1.0; // tune between 0.5..3.0
+        if (Math.abs(delta) < deadbandDeg) {
+            setpointDeg = currentDeg;
+        }
+
+        // command the controller with the continuous setpoint
+        angleController.setSetpoint(setpointDeg, ControlType.kPosition, ClosedLoopSlot.kSlot0);
 
 
 
@@ -179,11 +193,14 @@ public class SwerveModule {
     }
 
     public void resetToAbsolute() {
-        double absolutePosition = getCanCoder().getDegrees() - angleOffset.getDegrees();
-        // The position conversion factor for the encoder produces degrees, so set the
-        // integrated encoder position directly in degrees (don't multiply by 360).
-        integratedAngleEncoder.setPosition(absolutePosition);
+        double absoluteDeg = getCanCoder().getDegrees() - angleOffset.getDegrees(); // maybe 0..360
+        // normalize CANcoder value into (-180,180] to match our convenience
+        absoluteDeg = wrapDegTo180(absoluteDeg);
 
+        double currentDeg = integratedAngleEncoder.getPosition();
+        // pick the equivalent of absoluteDeg that is closest to currentDeg
+        double adjusted = currentDeg + wrapDegTo180(absoluteDeg - currentDeg);
+        integratedAngleEncoder.setPosition(adjusted);
     }
 
     public Rotation2d getCanCoder() {

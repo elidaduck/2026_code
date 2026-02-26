@@ -46,8 +46,8 @@ public final class Constants {
     public static final boolean invertNavx = false;
 
     /* Drivetrain Constants */
-    public static final double trackWidth = 0.74;
-    public static final double wheelBase = 0.74;
+    public static final double trackWidth = 0.69;
+    public static final double wheelBase = 0.63;
     public static final double wheelDiameter = Units.inchesToMeters(3.937);
     public static final double wheelCircumference = wheelDiameter * Math.PI;
 
@@ -122,7 +122,7 @@ public final class Constants {
       public static final int canCoderID = 9; //9
       public static final Rotation2d angleOffset = Rotation2d.fromDegrees(mod0OffSet);
     /* Angle Motor PID Values */
-      public static final double angleKP = 0.01; //to tune
+      public static final double angleKP = 0.3; //to tune
       public static final double angleKI = 0.0; //to tune
       public static final double angleKD = 0.0; //to tune
       public static final double angleKFF = 0.0; //to tune
@@ -139,7 +139,7 @@ public final class Constants {
       public static final int canCoderID = 10; //10
       public static final Rotation2d angleOffset = Rotation2d.fromDegrees(mod1OffSet);
       /* Angle Motor PID Values */
-      public static final double angleKP = 0.01; //to tune
+      public static final double angleKP = 0.3; //to tune
       public static final double angleKI = 0.0; //to tune
       public static final double angleKD = 0.0; //to tune
       public static final double angleKFF = 0.0; //to tune
@@ -156,7 +156,7 @@ public final class Constants {
       public static final int canCoderID = 12; //12
       public static final Rotation2d angleOffset = Rotation2d.fromDegrees(mod2OffSet);
       /* Angle Motor PID Values */
-      public static final double angleKP = 0.01; //to tune
+      public static final double angleKP = 0.3; //to tune
       public static final double angleKI = 0.0; //to tune
       public static final double angleKD = 0.0; //to tune
       public static final double angleKFF = 0.0; //to tune
@@ -173,7 +173,7 @@ public final class Constants {
       public static final int canCoderID = 11 ; //11
       public static final Rotation2d angleOffset = Rotation2d.fromDegrees(mod3OffSet);
         /* Angle Motor PID Values */
-      public static final double angleKP = 0.01; //to tune
+      public static final double angleKP = 0.3; //to tune
       public static final double angleKI = 0.0; //to tune
       public static final double angleKD = 0.0; //to tune
       public static final double angleKFF = 0.0; //to tune
@@ -193,13 +193,7 @@ public final class Constants {
 
   }
 
-  public static final class ClimberConstants{
-    public static final int leftClimberID = 27;
-    public static final int rightClimberID = 28;
-    public static final int digInputHESport = 0;
-    public static final IdleMode mode = IdleMode.kCoast;
-    public static final double encoderPositionConversionFactor = 0;
-  }
+
 
   public static final class AutoConstants {
     public static final double kMaxSpeedMetersPerSecond = 1.75;
