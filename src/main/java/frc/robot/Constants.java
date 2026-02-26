@@ -56,7 +56,7 @@ public final class Constants {
 
     public static final double driveGearRatio = (6.75 / 1.0); // 6.75:1 L2 Mk4 Modules
     //L1 is 8.14:1, L2 is 6.75:1, L3 is 6.12:1, L4 is 5.14:1
-    public static final double angleGearRatio = ((150/7)/1); // 12.8:1 MK4 SDS Modules
+    public static final double angleGearRatio = ((150.0/7)/1); // 12.8:1 MK4 SDS Modules
 
     public static final SwerveDriveKinematics swerveKinematics =
     new SwerveDriveKinematics(
@@ -122,7 +122,7 @@ public final class Constants {
       public static final int canCoderID = 9; //9
       public static final Rotation2d angleOffset = Rotation2d.fromDegrees(mod0OffSet);
     /* Angle Motor PID Values */
-      public static final double angleKP = 0.3; //to tune
+      public static final double angleKP = 0.01; //to tune
       public static final double angleKI = 0.0; //to tune
       public static final double angleKD = 0.0; //to tune
       public static final double angleKFF = 0.0; //to tune
@@ -139,7 +139,7 @@ public final class Constants {
       public static final int canCoderID = 10; //10
       public static final Rotation2d angleOffset = Rotation2d.fromDegrees(mod1OffSet);
       /* Angle Motor PID Values */
-      public static final double angleKP = 0.3; //to tune
+      public static final double angleKP = 0.01; //to tune
       public static final double angleKI = 0.0; //to tune
       public static final double angleKD = 0.0; //to tune
       public static final double angleKFF = 0.0; //to tune
@@ -156,7 +156,7 @@ public final class Constants {
       public static final int canCoderID = 12; //12
       public static final Rotation2d angleOffset = Rotation2d.fromDegrees(mod2OffSet);
       /* Angle Motor PID Values */
-      public static final double angleKP = 0.3; //to tune
+      public static final double angleKP = 0.01; //to tune
       public static final double angleKI = 0.0; //to tune
       public static final double angleKD = 0.0; //to tune
       public static final double angleKFF = 0.0; //to tune
@@ -173,7 +173,7 @@ public final class Constants {
       public static final int canCoderID = 11 ; //11
       public static final Rotation2d angleOffset = Rotation2d.fromDegrees(mod3OffSet);
         /* Angle Motor PID Values */
-      public static final double angleKP = 0.3; //to tune
+      public static final double angleKP = 0.01; //to tune
       public static final double angleKI = 0.0; //to tune
       public static final double angleKD = 0.0; //to tune
       public static final double angleKFF = 0.0; //to tune
