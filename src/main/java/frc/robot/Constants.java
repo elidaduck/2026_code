@@ -9,6 +9,7 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.revrobotics.*;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -27,9 +28,18 @@ import frc.lib.SwerveModuleConstants;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  public static final double intakeGearRatio  = (75/1)*22/17;
+  // intake pid // to tune
+  public static final double intakeKP = 0.1;
+  public static final double intakeKI = 0.0;
+  public static final double intakeKD = 0.0;
 
   
   public static final class SwerveConstants{
+    public static final double turnKp = 1;
+    public static final double turnKi = 0;
+    public static final double turnKd = 0;
+
 
     public static final double degreesOffSet = 0;
 

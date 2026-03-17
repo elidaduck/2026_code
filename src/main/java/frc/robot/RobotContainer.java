@@ -16,6 +16,12 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 // import frc.robot.commands.ClimberUp;
 import frc.robot.commands.TeleopSwerve;
+import frc.robot.subsystems.HopperSubsystem;
+import frc.robot.subsystems.HopperToOuttakeSubsystem;
+import frc.robot.subsystems.IntakeExtentionSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.LimeLight;
+import frc.robot.subsystems.OuttakeSubsystem;
 
 // import frc.robot.subsystems.Climber;6
 // import frc.robot.subsystems.Climber;
@@ -72,15 +78,7 @@ public class RobotContainer {
   private final Trigger r2Button = new JoystickButton(m_PS5Controller, PS5Controller.Button.kR2.value);
 
 
-  // private final JoystickButton climberUpButton = new JoystickButton(joystick, 1);
-  // private final JoystickButton climberDownButton = new JoystickButton(joystick, 2);
-  // private final Trigger intakeButtonIn = new JoystickButton(joystick,7); 
-  // private final Trigger intakeButtonOut = new JoystickButton(joystick,1); 
-  // private final Trigger shootAmpButton = new JoystickButton(joystick,6);
-  // private final Trigger feederButton = new JoystickButton(joystick,5);
-  // private final Trigger shootSpekerButton = new JoystickButton(joystick,8);
-  // private final Trigger climberDownButton = new JoystickButton(joystick,1);
-  // private final Trigger climberUpButton = new JoystickButton(joystick,2); 
+
 
 
 
@@ -88,10 +86,12 @@ public class RobotContainer {
 private final SwerveSubsystem m_SwerveSubsystem;
 
 
-// private final Intake m_intake;
-// private  final Climber climber;
-// private final ShooterSubsystem shootSub;
-// private final LimeLight vision;
+private final IntakeExtentionSubsystem m_intakeExtentionSubsystem;
+private final OuttakeSubsystem m_outtakeSubsystem;
+private final HopperToOuttakeSubsystem m_hopperToOuttakeSubsystem;
+private final IntakeSubsystem m_intake;
+private final HopperSubsystem m_hopper;
+private final LimeLight vision;
 
   
   
@@ -100,8 +100,13 @@ private final SwerveSubsystem m_SwerveSubsystem;
     
    
        /* Subsystems */
-   m_SwerveSubsystem = new SwerveSubsystem();
-
+  m_SwerveSubsystem = new SwerveSubsystem();
+  m_intakeExtentionSubsystem = new IntakeExtentionSubsystem();
+  m_outtakeSubsystem = new OuttakeSubsystem();
+  m_hopperToOuttakeSubsystem = new HopperToOuttakeSubsystem();
+  m_intake = new IntakeSubsystem();
+  m_hopper = new HopperSubsystem();
+  vision = new LimeLight(m_SwerveSubsystem);
   //  climber = new Climber();
   // vision= new LimeLight(m_SwerveSubsystem);
   //  shootSub= new ShooterSubsystem();
@@ -120,55 +125,6 @@ private final SwerveSubsystem m_SwerveSubsystem;
 
     configureBindings();
   }
-   // private Command visionAuto(){
-  //     List<Translation2d> bezierPoints = PathPlannerPath.bezierFromPoses(
-  //       m_SwerveSubsystem.getPose(),
-  //       vision.getTagPose());
-
-  //       PathPlannerPath path = new PathPlannerPath(
-  //       bezierPoints,
-  //       new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI), 
-  //       new GoalEndState(0.0, Rotation2d.fromDegrees(0)));
-
-  //    path.preventFlipping =true;
-  //    m_SwerveSubsystem.resetOdometry(path.getPreviewStartingHolonomicPose());
-  //   return AutoBuilder.followPath(path);
-  // }
-  
-  // NamedCommands.registerCommand("autoBalance", swerve.autoBalanceCommand());
-  // NamedCommands.registerCommand("exampleCommand", exampleSubsystem.exampleCommand());
-  // NamedCommands.registerCommand("someOtherCommand", new SomeOtherCommand());
-  // private Command testAuto(){
-  //      PathPlannerPath path = PathPlannerPath.fromPathFile("Work");
-  //      path.preventFlipping =true;
-  //      return AutoBuilder.followPath(path);
-  // }
-  // private Command shootAuto(){
-  //   return new SequentialCommandGroup(
-  //     new RunCommand(() -> shootSub.setshootspeedCommand(-0.35, 0.6).until(shootSub.isatSetpoint()),
-  //     new ParallelCommandGroup(
-  //     new RunCommand(() -> shootSub.setshootspeedCommand(-0.35, 0.6).withTimeout(3)),
-  //     new RunCommand(() -> m_intake.setintakemotorspeed(0.5).withTimeout(3))
-  //       )
-  //      )
-  //     );
-  // }
-  // private Command shootAndPickUpM(){
-  //   m_SwerveSubsystem.resetOdometry(PathPlannerAuto.getStaringPoseFromAutoFile("ShootAndPickUpM"));
-  //   return AutoBuilder.buildAuto("ShootAndPickUpM");
-  // }
-  
-  // private Command shootAuto(){
-  //   m_SwerveSubsystem.resetOdometry(PathPlannerAuto.getStaringPoseFromAutoFile("Shoot"));
-  //   return AutoBuilder.buildAuto("Shoot");
-  // }
-  // private Command shootSpeakerAuto(){
-  //   return new ParallelCommandGroup(
-  //     new shootWithTime(shootSub, -0.35, 0.65, 4),
-  //     new SetIntakeWithDelay(m_intake, 0.5, 3, 4.5)
-  //     );
-  // }
-
   public Command nullAuto(){
     return null;
   }
@@ -176,24 +132,23 @@ private final SwerveSubsystem m_SwerveSubsystem;
  
   private void configureBindings() {
     oButton.onTrue(new InstantCommand(() -> m_SwerveSubsystem.zeroGyro()));
-
-
-
+    sqrButton.onTrue(new InstantCommand(() -> m_intakeExtentionSubsystem.setIntakeExtentionSpeed(0.2)));
+    sqrButton.onFalse(new InstantCommand(() -> m_intakeExtentionSubsystem.stopIntake()));
+    triButton.onTrue(new InstantCommand(() -> m_intakeExtentionSubsystem.setIntakeExtentionSpeed(-0.2)));
+    triButton.onFalse(new InstantCommand(() -> m_intakeExtentionSubsystem.stopIntake()));
+    l1Button.onTrue(new InstantCommand(() -> m_intake.setIntakeSpeed(0.3)));
+    l1Button.onFalse(new InstantCommand(() -> m_intake.stopIntake()));
+    r1Button.onTrue(new InstantCommand(() -> m_hopper.setHopperSpeed(0.3)));
+    r1Button.onFalse(new InstantCommand(() -> m_hopper.stopHopper()));
+    l2Button.onTrue(new InstantCommand(() -> m_outtakeSubsystem.setOuttakeSpeed(-0.5)));
+    l2Button.onFalse(new InstantCommand(() -> m_outtakeSubsystem.stopOuttake()));
+    r2Button.onTrue(new InstantCommand(() -> m_hopperToOuttakeSubsystem.setHopperToOuttakeSpeed(0.5)));
+    r2Button.onFalse(new InstantCommand(() -> m_hopperToOuttakeSubsystem.stopHopperToOuttake()));
 
   
 
 
-    // climberUpButton.onTrue(new ClimberUp(climber, 0.5));
-    // climberUpButton.onFalse(new InstantCommand(() -> climber.stop()));
-    // climberDownButton.onTrue(new ClimberUp(climber, -0.5));
-    // climberDownButton.onFalse(new InstantCommand(() -> climber.stop()));
-    // chooser.setDefaultOption("no auto", nullAuto());
-    // chooser.addOption("shootAndPickUpM", shootAndPickUpM());
-    // chooser.addOption("shoot", shootAuto());
-    // chooser.addOption("new shoot", shootSpeakerAuto());
-    // // chooser.addOption("vision auto", visionAuto());
-    // chooser.addOption("test", testAuto());
-    // SmartDashboard.putData(chooser);
+
    
   }
 

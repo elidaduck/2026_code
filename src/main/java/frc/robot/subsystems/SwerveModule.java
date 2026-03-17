@@ -217,7 +217,7 @@ public class SwerveModule {
 
         CANSparkMaxUtil.setCANSparkMaxBusUsage(angleMotor, Usage.kPositionOnly);
 
-        angleMotor.configure(angleConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        angleMotor.configure(angleConfig,com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
 
         Timer.delay(1);
 
@@ -225,7 +225,7 @@ public class SwerveModule {
     }
 
     private void configDriveMotor() {
-        driveMotor.configure(driveConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        driveMotor.configure(driveConfig, com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
         // factory resets the spark max
 
         // full utilisation on the can loop hell yea

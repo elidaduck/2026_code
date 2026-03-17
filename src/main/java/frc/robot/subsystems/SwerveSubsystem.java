@@ -12,6 +12,8 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.config.*;
 import com.pathplanner.lib.util.*;
 import com.pathplanner.lib.auto.*;
+
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -29,12 +31,15 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.PPconstants;
+import frc.robot.Constants.SwerveConstants;
 
 
 public class SwerveSubsystem extends SubsystemBase {
   private final Pigeon2 gyro;
   private Pose2d previousPose;
   private long lastUpdateTime;
+  public PIDController turnController;
+
 
 
   private SwerveDriveOdometry swerveOdometry;
@@ -44,6 +49,9 @@ public class SwerveSubsystem extends SubsystemBase {
 
   /** Creates a new SwerveSubsystem. */
   public SwerveSubsystem() {
+    turnController = new PIDController(SwerveConstants.turnKp, SwerveConstants.turnKi, SwerveConstants.turnKd);
+    turnController.setTolerance(Math.toRadians(1));
+
     //instantiates new pigeon gyro, wipes it, and zeros it
     gyro = new Pigeon2(1);
     zeroGyro();
