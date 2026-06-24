@@ -5,15 +5,21 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+
+import static edu.wpi.first.units.Units.Rotations;
+
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.spark.SparkMax;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class OuttakeSubsystem extends SubsystemBase {
-  private final SparkMax outtakeMotor;
+  private final TalonFX outtakeMotor;
+  private final LimeLight m_limeLight;
   /** Creates a new OuttakeSubsystem. */
-  public OuttakeSubsystem() {
-    outtakeMotor = new SparkMax(14, MotorType.kBrushless);
+  public OuttakeSubsystem(LimeLight m_limeLight) {
+    outtakeMotor = new TalonFX(14);
+    this.m_limeLight = m_limeLight;
   }
   public void setOuttakeSpeed(double speed){
     //speed = getDistanceSpeed();
@@ -23,7 +29,7 @@ public class OuttakeSubsystem extends SubsystemBase {
     outtakeMotor.set(0);
   }
   public double getDistanceSpeed(){
-    double distance = LimeLight.getDistance(); //get distance from limelight
+    double distance = m_limeLight.getDistance(); //get distance from limelight
     //calculate speed based on distance
     return distance;
   }

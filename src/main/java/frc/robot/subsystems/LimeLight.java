@@ -17,6 +17,7 @@ import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.units.PerUnit;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
@@ -38,6 +39,7 @@ public class LimeLight extends SubsystemBase {
   public  double[] tagpose, botpose; 
   private int pipeline; 
   public  double distance;
+  public double tagOmega;
 
   //trajectory fields
   private Trajectory trajectory;
@@ -160,7 +162,7 @@ public class LimeLight extends SubsystemBase {
       
       return trajectory; 
   
-  }
+    }
 
     public void faceTag(){
 
@@ -169,20 +171,22 @@ public class LimeLight extends SubsystemBase {
             double txDegrees = getTx();
 
             // convert to radians
-            double errorRad = Math.toRadians(txDegrees);
+            double errorRad = Math.toRadians(-txDegrees);
 
             // simple P controller to convert angle error to angular velocity
             double omega = m_SwerveSubsystem.turnController.calculate(errorRad, 0); // setpoint is 0 radians (facing the tag)
 
             // clamp
             omega = Math.max(-Constants.SwerveConstants.maxAngularVelocity, Math.min(Constants.SwerveConstants.maxAngularVelocity, omega));
-            omega = MathUtil.applyDeadband(omega, Constants.SwerveConstants.inputDeadband);
+            // omega = MathUtil.applyDeadband(omega, Constants.SwerveConstants.inputDeadband);
 
+            SmartDashboard.putNumber("omega", omega);
             // drive: translation=0, rotation=omega (rad/s), fieldRelative=true, isOpenLoop=true
-            m_SwerveSubsystem.drive(new Translation2d(0,0), omega, true, true);
-        }else{
-            // if no target, stop rotating
-            m_SwerveSubsystem.drive(new Translation2d(0,0), 0, true, true);
+            m_SwerveSubsystem.drive(new Translation2d(0,0), omega*Constants.SwerveConstants.maxAngularVelocity, true, true);
         }
+        // else{
+        //     // if no target, stop rotating
+        //     m_SwerveSubsystem.drive(new Translation2d(0,0), 0, true, true);
+        // }
     }
 }

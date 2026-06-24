@@ -113,11 +113,6 @@ public class SwerveModule {
         configDriveMotor();
 
         lastAngle = getState().angle;
-
-        resetToAbsolute();
-
-
-
     }
 
     public SwerveModuleState getState() {
@@ -127,6 +122,7 @@ public class SwerveModule {
     public SwerveModulePosition getPosition() {
         return new SwerveModulePosition(driveEncoder.getPosition(), getAngle());
     }
+
     public boolean isOptimizable(SwerveModuleState desiredState) {
         Rotation2d setPointDirection = desiredState.angle;
         Rotation2d currentDirection = getState().angle;
@@ -135,11 +131,24 @@ public class SwerveModule {
         // If the dot product is negative, reversing the wheel direction may be beneficial
         return deltaDirection < 0;
     }
+
     /** Normalize angle (degrees) to range (-180, 180] */
     private double wrapDegTo180(double angle) {
         double a = ((angle + 180.0) % 360.0);
         if (a < 0) a += 360.0;
         return a - 180.0;
+    }
+
+    /** Optimize to ±90° (180° wrapping for swerve) */
+    private double optimize180(double setpointDeg, double currentDeg) {
+        double delta = wrapDegTo180(setpointDeg - currentDeg);
+        
+        // If delta is outside ±90°, reverse wheel and add 180°
+        if (Math.abs(delta) > 90.0) {
+            delta = delta > 0 ? delta - 180.0 : delta + 180.0;
+        }
+        
+        return currentDeg + delta;
     }
 
     public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop) {
@@ -154,57 +163,60 @@ public class SwerveModule {
     }
     
 
-   private void setSpeed(SwerveModuleState desiredState, boolean isOpenLoop) {
-    if (isOpenLoop) {
-        // when not taking feedback
-        double percentOutput = desiredState.speedMetersPerSecond / Constants.SwerveConstants.maxSpeed;
-        driveMotor.set(percentOutput);
-    } else {
-        driveController.setSetpoint(
-                desiredState.speedMetersPerSecond,
-                ControlType.kVelocity,
-                ClosedLoopSlot.kSlot0,
-                driveFeedforward.calculate(desiredState.speedMetersPerSecond));
+    private void setSpeed(SwerveModuleState desiredState, boolean isOpenLoop) {
+        if (isOpenLoop) {
+            // when not taking feedback
+            double percentOutput = desiredState.speedMetersPerSecond / Constants.SwerveConstants.maxSpeed;
+            driveMotor.set(percentOutput);
+        } else {
+            driveController.setSetpoint(
+                    desiredState.speedMetersPerSecond,
+                    ControlType.kVelocity,
+                    ClosedLoopSlot.kSlot0,
+                    driveFeedforward.calculate(desiredState.speedMetersPerSecond));
+        }
     }
-}
+
     public void setAngle(SwerveModuleState desiredState) {
         // read continuous encoder position (degrees)
         double currentDeg = integratedAngleEncoder.getPosition();
 
         // desired angle from WPILib SwerveModuleState (degrees)
-        double desiredDeg = desiredState.angle.getDegrees(); // ensure this is in -180..180 or 0..360
+        double desiredDeg = desiredState.angle.getDegrees();
 
-        // compute minimal delta and continuous setpoint
-        double delta = wrapDegTo180(desiredDeg - currentDeg);
-        double setpointDeg = currentDeg + delta;
+        // compute minimal delta with 180° wrapping
+        double setpointDeg = optimize180(desiredDeg, currentDeg);
 
         // optional deadband to avoid jitter for tiny deltas
-        final double deadbandDeg = 1.0; // tune between 0.5..3.0
-        if (Math.abs(delta) < deadbandDeg) {
+        final double deadbandDeg = 1.0;
+        if (Math.abs(wrapDegTo180(desiredDeg - currentDeg)) < deadbandDeg) {
             setpointDeg = currentDeg;
         }
 
         // command the controller with the continuous setpoint
         angleController.setSetpoint(setpointDeg, ControlType.kPosition, ClosedLoopSlot.kSlot0);
 
-
-
         lastAngle = getState().angle;
     }
 
     public void resetToAbsolute() {
-        double absoluteDeg = getCanCoder().getDegrees() - angleOffset.getDegrees(); // maybe 0..360
-        // normalize CANcoder value into (-180,180] to match our convenience
-        absoluteDeg = wrapDegTo180(absoluteDeg);
+        // Seed the integrated encoder to (CANcoder reading - angleOffset).
+        // angleOffset is the CANcoder value when the wheel physically points forward,
+        // so subtracting it here makes encoder 0 == wheel pointing straight.
+        double cancoderDegrees = getCanCoder().getDegrees();
+        double absolutePositionDegrees = cancoderDegrees - angleOffset.getDegrees();
+        integratedAngleEncoder.setPosition(-absolutePositionDegrees);
 
-        double currentDeg = integratedAngleEncoder.getPosition();
-        // pick the equivalent of absoluteDeg that is closest to currentDeg
-        double adjusted = currentDeg + wrapDegTo180(absoluteDeg - currentDeg);
-        integratedAngleEncoder.setPosition(adjusted);
+        // Immediately tell the PID to hold this position.
+        // Without this, the PID's setpoint is still 0 (reset by configure()), so it
+        // would drive the wheel from its current angle back to 0° on startup.
+        angleController.setSetpoint(absolutePositionDegrees, ControlType.kPosition, ClosedLoopSlot.kSlot0);
     }
 
     public Rotation2d getCanCoder() {
-        return Rotation2d.fromDegrees(angleEncoder.getAbsolutePosition().getValueAsDouble());
+        // Phoenix 6 getAbsolutePosition() returns ROTATIONS (0.0–1.0), not degrees.
+        // Use fromRotations() so 0.5 rotations correctly becomes 180°.
+        return Rotation2d.fromRotations(angleEncoder.getAbsolutePosition().getValueAsDouble());
     }
 
     private void configAngleEncoder() {
@@ -217,10 +229,11 @@ public class SwerveModule {
 
         CANSparkMaxUtil.setCANSparkMaxBusUsage(angleMotor, Usage.kPositionOnly);
 
-        angleMotor.configure(angleConfig,com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
+        angleMotor.configure(angleConfig, com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
 
         Timer.delay(1);
 
+        // Sync integrated encoder to CANcoder on startup
         resetToAbsolute();
     }
 
@@ -233,16 +246,14 @@ public class SwerveModule {
         // sets current limit
 
         // burns to spark max
-;
+        ;
         // resets encoder position to 0
         driveEncoder.setPosition(0.0);
     }
 
     private Rotation2d getAngle() {
+        // The integrated encoder was seeded by resetToAbsolute() to already account
+        // for angleOffset, so just return its position directly.
         return Rotation2d.fromDegrees(integratedAngleEncoder.getPosition());
-        
     }
-
-    
-
 }

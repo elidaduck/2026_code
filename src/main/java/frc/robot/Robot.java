@@ -5,6 +5,7 @@
 package frc.robot;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.ctre.phoenix6.swerve.SwerveModule;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -24,8 +25,7 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private RobotContainer m_robotContainer;
-  private SwerveSubsystem swerveSubsystem;
-  private DigitalInput limitSwitch = new DigitalInput(9);
+
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -80,6 +80,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
+    // m_robotContainer.m_SwerveSubsystem.mSwerveMods[1].resetToAbsolute();
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove

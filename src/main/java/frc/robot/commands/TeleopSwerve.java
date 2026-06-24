@@ -21,10 +21,14 @@ public class TeleopSwerve extends Command {
   private DoubleSupplier m_strafeSupplier;
   private DoubleSupplier m_rotationSupplier;
   private BooleanSupplier m_robotCentricSupplier;
-
   private SlewRateLimiter translationLimiter = new SlewRateLimiter(3.0); //can only change by 3 m/s in the span of 1 s
   private SlewRateLimiter strafeLimiter = new SlewRateLimiter(3.0);
   private SlewRateLimiter rotationLimiter = new SlewRateLimiter(3.0);
+
+  private double translationVal;
+  private double strafeVal;
+  private double rotationVal;
+
   /** Creates a new TeleopSwerve. */
   public TeleopSwerve(SwerveSubsystem SwerveSubsystem,
       DoubleSupplier translationSupplier,
@@ -42,31 +46,31 @@ public class TeleopSwerve extends Command {
   @Override
   public void initialize() {}
 
+  private void calcDeadband()
+  {
+    translationVal = translationLimiter.calculate(
+      MathUtil.applyDeadband(m_translationSupplier.getAsDouble(), Constants.SwerveConstants.inputDeadband));
+    strafeVal = strafeLimiter.calculate(
+      MathUtil.applyDeadband(m_strafeSupplier.getAsDouble(), Constants.SwerveConstants.inputDeadband));
+    rotationVal = rotationLimiter.calculate(
+      MathUtil.applyDeadband(m_rotationSupplier.getAsDouble(), Constants.SwerveConstants.inputDeadband));
+
+  }
+
   @Override
   public void execute() {
         /* Get Values, applies Deadband, (doesnt do anything if stick is less than a value)*/
-    double translationVal =
-        translationLimiter.calculate(
-            MathUtil.applyDeadband(m_translationSupplier.getAsDouble(), Constants.SwerveConstants.inputDeadband));
-    double strafeVal =
-        strafeLimiter.calculate(
-            MathUtil.applyDeadband(m_strafeSupplier.getAsDouble(), Constants.SwerveConstants.inputDeadband));
-    double rotationVal =
-        rotationLimiter.calculate(
-            MathUtil.applyDeadband(m_rotationSupplier.getAsDouble(), Constants.SwerveConstants.inputDeadband));
-
-
-    
+      calcDeadband();
+      // postion ration movment value
+      
+      Translation2d translation = new Translation2d(translationVal, strafeVal).times(Constants.SwerveConstants.maxSpeed);
+      double rotation = rotationVal * Constants.SwerveConstants.maxAngularVelocity;
 
     /* Drive */
     m_SwerveSubsystem.drive(
-        //the joystick values (-1 to 1) multiplied by the max speed of the drivetrain
-        new Translation2d(translationVal, strafeVal).times(Constants.SwerveConstants.maxSpeed),
-        //rotation value times max spin speed
-        rotationVal * Constants.SwerveConstants.maxAngularVelocity,
-        //whether or not in field centric mode
+        translation,
+        rotation,
         true,
-        //open loop control
         true);
     //!m_robotCentricSupplier.getAsBoolean()
   }

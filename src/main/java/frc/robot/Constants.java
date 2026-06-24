@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.swerve.SwerveModule;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
 import com.revrobotics.*;
@@ -18,6 +19,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import frc.lib.SwerveModuleConstants;
+import frc.robot.subsystems.SwerveSubsystem;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -36,7 +38,7 @@ public final class Constants {
 
   
   public static final class SwerveConstants{
-    public static final double turnKp = 1;
+    public static final double turnKp = 3;
     public static final double turnKi = 0;
     public static final double turnKd = 0;
 
@@ -106,8 +108,8 @@ public final class Constants {
     public static final double angleConversionFactor = 360.0 / angleGearRatio;
 
     /* Swerve Profiling Values */
-    public static final double maxSpeed = 4; // meters per second //9 4.5
-    public static final double maxAngularVelocity =4 ; //what are these units? //11.5
+    public static final double maxSpeed = 4.5; // meters per second //9 4.5
+    public static final double maxAngularVelocity = 3 ; //what are these units? //11.5
 
     /* Neutral Modes */ 
     public static final IdleMode angleNeutralMode = IdleMode.kBrake; //change to break
@@ -132,9 +134,9 @@ public final class Constants {
       public static final int canCoderID = 9; //9
       public static final Rotation2d angleOffset = Rotation2d.fromDegrees(mod0OffSet);
     /* Angle Motor PID Values */
-      public static final double angleKP = 0.01; //to tune
-      public static final double angleKI = 0.0; //to tune
-      public static final double angleKD = 0.0; //to tune
+      public static final double angleKP = 0.015; //to tune
+      public static final double angleKI = 0; //to tune
+      public static final double angleKD = 0.005; //to tune
       public static final double angleKFF = 0.0; //to tune
     
       public static final SwerveModuleConstants constants =
@@ -149,9 +151,9 @@ public final class Constants {
       public static final int canCoderID = 10; //10
       public static final Rotation2d angleOffset = Rotation2d.fromDegrees(mod1OffSet);
       /* Angle Motor PID Values */
-      public static final double angleKP = 0.01; //to tune
-      public static final double angleKI = 0.0; //to tune
-      public static final double angleKD = 0.0; //to tune
+      public static final double angleKP = 0.015; //to tune
+      public static final double angleKI = 0; //to tune
+      public static final double angleKD = 0.005; //to tune
       public static final double angleKFF = 0.0; //to tune
         
       public static final SwerveModuleConstants constants =
@@ -166,9 +168,9 @@ public final class Constants {
       public static final int canCoderID = 12; //12
       public static final Rotation2d angleOffset = Rotation2d.fromDegrees(mod2OffSet);
       /* Angle Motor PID Values */
-      public static final double angleKP = 0.01; //to tune
-      public static final double angleKI = 0.0; //to tune
-      public static final double angleKD = 0.0; //to tune
+      public static final double angleKP = 0.015; //to tune
+      public static final double angleKI = 0; //to tune
+      public static final double angleKD = 0.005; //to tune
       public static final double angleKFF = 0.0; //to tune
   
       public static final SwerveModuleConstants constants =
@@ -183,9 +185,9 @@ public final class Constants {
       public static final int canCoderID = 11 ; //11
       public static final Rotation2d angleOffset = Rotation2d.fromDegrees(mod3OffSet);
         /* Angle Motor PID Values */
-      public static final double angleKP = 0.01; //to tune
-      public static final double angleKI = 0.0; //to tune
-      public static final double angleKD = 0.0; //to tune
+      public static final double angleKP = 0.015; //to tune
+      public static final double angleKI = 0; //to tune
+      public static final double angleKD = 0.005; //to tunex
       public static final double angleKFF = 0.0; //to tune
     
       public static final SwerveModuleConstants constants =

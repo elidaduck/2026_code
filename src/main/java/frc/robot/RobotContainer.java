@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-
+import frc.robot.commands.OuttakeCommand;
 // import frc.robot.commands.ClimberUp;
 import frc.robot.commands.TeleopSwerve;
 import frc.robot.subsystems.HopperSubsystem;
@@ -76,6 +76,8 @@ public class RobotContainer {
   private final Trigger r1Button = new JoystickButton(m_PS5Controller, PS5Controller.Button.kR1.value);
   private final Trigger l2Button = new JoystickButton(m_PS5Controller, PS5Controller.Button.kL2.value);
   private final Trigger r2Button = new JoystickButton(m_PS5Controller, PS5Controller.Button.kR2.value);
+  private final Trigger middleButton = new JoystickButton(m_PS5Controller, PS5Controller.Button.kTouchpad.value);
+  private final Trigger psButton = new JoystickButton(m_PS5Controller, PS5Controller.Button.kPS.value);
 
 
 
@@ -83,15 +85,17 @@ public class RobotContainer {
 
 
 
-private final SwerveSubsystem m_SwerveSubsystem;
+  public final SwerveSubsystem m_SwerveSubsystem;
 
 
-private final IntakeExtentionSubsystem m_intakeExtentionSubsystem;
-private final OuttakeSubsystem m_outtakeSubsystem;
-private final HopperToOuttakeSubsystem m_hopperToOuttakeSubsystem;
-private final IntakeSubsystem m_intake;
-private final HopperSubsystem m_hopper;
-private final LimeLight vision;
+  private final IntakeExtentionSubsystem m_intakeExtentionSubsystem;
+  private final OuttakeSubsystem m_outtakeSubsystem;
+  private final HopperToOuttakeSubsystem m_hopperToOuttakeSubsystem;
+  private final IntakeSubsystem m_intake;
+  private final HopperSubsystem m_hopper;
+  private final LimeLight vision;
+  private final TeleopSwerve controllerSwerve;
+  private final OuttakeCommand m_OuttakeCommand;
 
   
   
@@ -102,26 +106,24 @@ private final LimeLight vision;
        /* Subsystems */
   m_SwerveSubsystem = new SwerveSubsystem();
   m_intakeExtentionSubsystem = new IntakeExtentionSubsystem();
-  m_outtakeSubsystem = new OuttakeSubsystem();
   m_hopperToOuttakeSubsystem = new HopperToOuttakeSubsystem();
   m_intake = new IntakeSubsystem();
   m_hopper = new HopperSubsystem();
   vision = new LimeLight(m_SwerveSubsystem);
-  //  climber = new Climber();
-  // vision= new LimeLight(m_SwerveSubsystem);
-  //  shootSub= new ShooterSubsystem();
-
-  //  NamedCommands.registerCommand("shootSpeakerAuto", shootSpeakerAuto());
-
-  //  chooser=new SendableChooser<>();
-   
-    m_SwerveSubsystem.setDefaultCommand(
-      new TeleopSwerve(
+  m_outtakeSubsystem = new OuttakeSubsystem(vision);
+  m_OuttakeCommand = new OuttakeCommand(m_hopper, m_hopperToOuttakeSubsystem, m_outtakeSubsystem);
+  controllerSwerve =  new TeleopSwerve(
           m_SwerveSubsystem,
           () -> -m_PS5Controller.getRawAxis(translationAxis),
           () -> -m_PS5Controller.getRawAxis(strafeAxis),
-          () -> -m_PS5Controller.getRawAxis(rotationAxis),
-          () -> robotCentric.getAsBoolean()));
+          () -> m_PS5Controller.getRawAxis(rotationAxis),
+          () -> robotCentric.getAsBoolean());
+
+
+
+   
+    m_SwerveSubsystem.setDefaultCommand(controllerSwerve);
+    
 
     configureBindings();
   }
@@ -136,14 +138,21 @@ private final LimeLight vision;
     sqrButton.onFalse(new InstantCommand(() -> m_intakeExtentionSubsystem.stopIntake()));
     triButton.onTrue(new InstantCommand(() -> m_intakeExtentionSubsystem.setIntakeExtentionSpeed(-0.2)));
     triButton.onFalse(new InstantCommand(() -> m_intakeExtentionSubsystem.stopIntake()));
-    l1Button.onTrue(new InstantCommand(() -> m_intake.setIntakeSpeed(0.3)));
-    l1Button.onFalse(new InstantCommand(() -> m_intake.stopIntake()));
-    r1Button.onTrue(new InstantCommand(() -> m_hopper.setHopperSpeed(0.3)));
-    r1Button.onFalse(new InstantCommand(() -> m_hopper.stopHopper()));
-    l2Button.onTrue(new InstantCommand(() -> m_outtakeSubsystem.setOuttakeSpeed(-0.5)));
-    l2Button.onFalse(new InstantCommand(() -> m_outtakeSubsystem.stopOuttake()));
-    r2Button.onTrue(new InstantCommand(() -> m_hopperToOuttakeSubsystem.setHopperToOuttakeSpeed(0.5)));
-    r2Button.onFalse(new InstantCommand(() -> m_hopperToOuttakeSubsystem.stopHopperToOuttake()));
+    l1Button.onTrue(m_OuttakeCommand.onlyWhile(l1Button));
+    l2Button.onTrue(new InstantCommand(() -> m_intake.setIntakeSpeed(0.18)));
+    // l1Button.onTrue(new InstantCommand(() -> m_intake.setIntakeSpeed(0.2)));
+    // l1Button.onFalse(new InstantCommand(() -> m_intake.stopIntake()));
+    // r1Button.onTrue(new InstantCommand(() -> m_hopper.setHopperSpeed(0.3)));
+    // r1Button.onFalse(new InstantCommand(() -> m_hopper.stopHopper()));
+    // l2Button.onTrue(new InstantCommand(() -> m_outtakeSubsystem.setOuttakeSpeed(0.6)));
+    // l2Button.onFalse(new InstantCommand(() -> m_outtakeSubsystem.stopOuttake()));
+    // r2Button.onTrue(new InstantCommand(() -> m_hopperToOuttakeSubsystem.setHopperToOuttakeSpeed(-0.8)));
+    // r2Button.onFalse(new InstantCommand(() -> m_hopperToOuttakeSubsystem.stopHopperToOuttake()));
+    middleButton.onTrue(new RunCommand(() -> vision.faceTag()).onlyWhile(r2Button));
+    middleButton.onFalse((controllerSwerve));
+    psButton.onTrue(new InstantCommand(() -> m_hopper.setHopperSpeed(-0.3)));
+    psButton.onFalse(new InstantCommand(() -> m_hopper.stopHopper()));
+
 
   
 

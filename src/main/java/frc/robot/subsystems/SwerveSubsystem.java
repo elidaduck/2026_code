@@ -35,22 +35,22 @@ import frc.robot.Constants.SwerveConstants;
 
 
 public class SwerveSubsystem extends SubsystemBase {
+  private SwerveModuleState wantedState = new SwerveModuleState(-2, Rotation2d.fromDegrees(45));
   private final Pigeon2 gyro;
-  private Pose2d previousPose;
-  private long lastUpdateTime;
+
   public PIDController turnController;
 
 
 
   private SwerveDriveOdometry swerveOdometry;
-  private SwerveModule[] mSwerveMods;
+  public SwerveModule[] mSwerveMods;
 
   private Field2d field;
 
   /** Creates a new SwerveSubsystem. */
   public SwerveSubsystem() {
     turnController = new PIDController(SwerveConstants.turnKp, SwerveConstants.turnKi, SwerveConstants.turnKd);
-    turnController.setTolerance(Math.toRadians(1));
+    turnController.setTolerance(Math.toRadians(2));
 
     //instantiates new pigeon gyro, wipes it, and zeros it
     gyro = new Pigeon2(1);
@@ -88,9 +88,11 @@ public class SwerveSubsystem extends SubsystemBase {
     );
   }
 
-public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
-    // get the current pose of the robot
+
+  public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {  
     Pose2d currentPose = swerveOdometry.getPoseMeters();
+
+    
 
     // get the current yaw of the robot
     double currentYaw = currentPose.getRotation().getDegrees();
@@ -99,20 +101,22 @@ public void drive(Translation2d translation, double rotation, boolean fieldRelat
     // calculate the desired chassis speed based on the desired pose
     ChassisSpeeds desiredChassisSpeeds = fieldRelative
         ? ChassisSpeeds.fromFieldRelativeSpeeds(
-            -translation.getX(), translation.getY(), rotation, Rotation2d.fromDegrees(-currentYaw))
+            -translation.getX(), translation.getY(), -rotation, Rotation2d.fromDegrees(-currentYaw))
         : new ChassisSpeeds(-translation.getX(), translation.getY(), rotation);
 
     // calculate the desired swerve module states based on the desired chassis speed
-    SmartDashboard.putNumber("rotation", rotation);
     SwerveModuleState[] desiredSwerveModuleStates = Constants.SwerveConstants.swerveKinematics.toSwerveModuleStates(desiredChassisSpeeds);
 
-    // update the swerve module states for each module
-    for (int i = 0; i < 4; i++) {
-        SwerveModule mod = mSwerveMods[i];
-         SwerveModuleState desiredState = desiredSwerveModuleStates[i];
+    // update the swerve module states for each module\
 
+    for (int i = 0; i < 4; i++) {
+
+
+        SwerveModule mod = mSwerveMods[i];
+        
+        SwerveModuleState desiredState = desiredSwerveModuleStates[i];
         // Add this line to ensure the module's angle is set correctly
-        mod.setAngle(desiredState);
+        // mod.setAngle(desiredState);
 
         mod.setDesiredState(desiredState, isOpenLoop);
     }
@@ -239,13 +243,13 @@ public void drive(Translation2d translation, double rotation, boolean fieldRelat
     SmartDashboard.putNumber("robot pose y", getPose().getY());
     for (SwerveModule mod : mSwerveMods) {
       SmartDashboard.putNumber(
-          "Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
+          "Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getRotations());
       SmartDashboard.putNumber(
           "Mod " + mod.moduleNumber + " Integrated Angle", mod.getState().angle.getDegrees());
       SmartDashboard.putNumber(
           "Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);
+    }
   }
-}
 
 
 }
