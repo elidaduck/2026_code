@@ -60,6 +60,7 @@ public class RobotContainer {
  
   // private SendableChooser<Command> chooser;
   private final PS5Controller m_PS5Controller = new PS5Controller(0);
+  private final GenericHID m_subsystemsController = new GenericHID(1);
 
   // private final GenericHID joystick = new GenericHID(1);
 
@@ -78,6 +79,17 @@ public class RobotContainer {
   private final Trigger r2Button = new JoystickButton(m_PS5Controller, PS5Controller.Button.kR2.value);
   private final Trigger middleButton = new JoystickButton(m_PS5Controller, PS5Controller.Button.kTouchpad.value);
   private final Trigger psButton = new JoystickButton(m_PS5Controller, PS5Controller.Button.kPS.value);
+  private final Trigger button1 = new JoystickButton(m_subsystemsController, 1);
+  private final Trigger button2 = new JoystickButton(m_subsystemsController, 2);
+  private final Trigger button3 = new JoystickButton(m_subsystemsController, 3);
+  private final Trigger button4 = new JoystickButton(m_subsystemsController, 4);
+  private final Trigger button5 = new JoystickButton(m_subsystemsController, 5);
+  private final Trigger button6 = new JoystickButton(m_subsystemsController, 6);
+  private final Trigger button7 = new JoystickButton(m_subsystemsController, 7);
+  private final Trigger button8 = new JoystickButton(m_subsystemsController, 8);
+  private final Trigger button9 = new JoystickButton(m_subsystemsController, 9);
+
+
 
 
 
@@ -134,12 +146,15 @@ public class RobotContainer {
  
   private void configureBindings() {
     oButton.onTrue(new InstantCommand(() -> m_SwerveSubsystem.zeroGyro()));
-    sqrButton.onTrue(new InstantCommand(() -> m_intakeExtentionSubsystem.setIntakeExtentionSpeed(0.2)));
-    sqrButton.onFalse(new InstantCommand(() -> m_intakeExtentionSubsystem.stopIntake()));
-    triButton.onTrue(new InstantCommand(() -> m_intakeExtentionSubsystem.setIntakeExtentionSpeed(-0.2)));
-    triButton.onFalse(new InstantCommand(() -> m_intakeExtentionSubsystem.stopIntake()));
-    l1Button.onTrue(m_OuttakeCommand.onlyWhile(l1Button));
-    l2Button.onTrue(new InstantCommand(() -> m_intake.setIntakeSpeed(0.18)));
+    button5.onTrue(new InstantCommand(() -> m_intakeExtentionSubsystem.setIntakeExtentionSpeed(0.2)));
+    button5.onFalse(new InstantCommand(() -> m_intakeExtentionSubsystem.stopIntake()));
+    button3.onTrue(new InstantCommand(() -> m_intakeExtentionSubsystem.setIntakeExtentionSpeed(-0.2)));
+    button3.onFalse(new InstantCommand(() -> m_intakeExtentionSubsystem.stopIntake()));
+    button1.onTrue(m_OuttakeCommand.onlyWhile(button1));
+    button2.onTrue(new InstantCommand(() -> m_intake.setIntakeSpeed(0.18)));
+    button2.onFalse(new InstantCommand(() -> m_intake.stopIntake()));
+    button4.onTrue(new SequentialCommandGroup(new InstantCommand(() ->m_hopper.setHopperSpeed(0.3)),new InstantCommand(() -> m_hopperToOuttakeSubsystem.setHopperToOuttakeSpeed(-0.7))));
+    button4.onFalse(new SequentialCommandGroup(new InstantCommand(() -> m_hopper.stopHopper()),new InstantCommand(() -> m_hopperToOuttakeSubsystem.stopHopperToOuttake())));
     // l1Button.onTrue(new InstantCommand(() -> m_intake.setIntakeSpeed(0.2)));
     // l1Button.onFalse(new InstantCommand(() -> m_intake.stopIntake()));
     // r1Button.onTrue(new InstantCommand(() -> m_hopper.setHopperSpeed(0.3)));
@@ -148,10 +163,10 @@ public class RobotContainer {
     // l2Button.onFalse(new InstantCommand(() -> m_outtakeSubsystem.stopOuttake()));
     // r2Button.onTrue(new InstantCommand(() -> m_hopperToOuttakeSubsystem.setHopperToOuttakeSpeed(-0.8)));
     // r2Button.onFalse(new InstantCommand(() -> m_hopperToOuttakeSubsystem.stopHopperToOuttake()));
-    middleButton.onTrue(new RunCommand(() -> vision.faceTag()).onlyWhile(r2Button));
-    middleButton.onFalse((controllerSwerve));
-    psButton.onTrue(new InstantCommand(() -> m_hopper.setHopperSpeed(-0.3)));
-    psButton.onFalse(new InstantCommand(() -> m_hopper.stopHopper()));
+    // middleButton.onTrue(new RunCommand(() -> vision.faceTag()).onlyWhile(r2Button));
+    // middleButton.onFalse((controllerSwerve));
+    // psButton.onTrue(new InstantCommand(() -> m_hopper.setHopperSpeed(-0.3)));
+    // psButton.onFalse(new InstantCommand(() -> m_hopper.stopHopper()));
 
 
   

@@ -15,6 +15,7 @@ public class OuttakeCommand extends Command {
   private HopperSubsystem m_HopperSubsystem;
   private HopperToOuttakeSubsystem m_HopperToOuttakeSubsystem;
   private OuttakeSubsystem m_OuttakeSubsystem;
+  private int tick = 0;
   
   /** Creates a new outtakeCommand. */
   public OuttakeCommand(HopperSubsystem m_HopperSubsystem,
@@ -34,7 +35,13 @@ public class OuttakeCommand extends Command {
   @Override
   public void execute() {
     m_HopperSubsystem.setHopperSpeed(0.3);
-    m_HopperToOuttakeSubsystem.setHopperToOuttakeSpeed(-0.8);
+    if(tick < 5) {
+      m_HopperToOuttakeSubsystem.setHopperToOuttakeSpeed(-0.8);
+      tick++;
+    } else {
+      m_HopperToOuttakeSubsystem.stopHopperToOuttake();
+      tick = 0;
+    }
     m_OuttakeSubsystem.setOuttakeSpeed(0.75);
   }
 

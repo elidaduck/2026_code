@@ -92,8 +92,6 @@ public class SwerveSubsystem extends SubsystemBase {
   public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {  
     Pose2d currentPose = swerveOdometry.getPoseMeters();
 
-    
-
     // get the current yaw of the robot
     double currentYaw = currentPose.getRotation().getDegrees();
   
@@ -101,7 +99,7 @@ public class SwerveSubsystem extends SubsystemBase {
     // calculate the desired chassis speed based on the desired pose
     ChassisSpeeds desiredChassisSpeeds = fieldRelative
         ? ChassisSpeeds.fromFieldRelativeSpeeds(
-            -translation.getX(), translation.getY(), -rotation, Rotation2d.fromDegrees(-currentYaw))
+            -translation.getX(), translation.getY(), rotation, Rotation2d.fromDegrees(-currentYaw))
         : new ChassisSpeeds(-translation.getX(), translation.getY(), rotation);
 
     // calculate the desired swerve module states based on the desired chassis speed

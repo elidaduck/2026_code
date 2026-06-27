@@ -225,7 +225,7 @@ public final class Constants {
 
 
 public static final class PPconstants{
-  public static final double robotMassKG = 15;
+  public static final double robotMassKG = 40 ;
   public static final double MOI = 5;
 
 
