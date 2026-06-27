@@ -122,7 +122,7 @@ public class RobotContainer {
   m_intake = new IntakeSubsystem();
   m_hopper = new HopperSubsystem();
   vision = new LimeLight(m_SwerveSubsystem);
-  m_outtakeSubsystem = new OuttakeSubsystem(vision);
+  m_outtakeSubsystem = new OuttakeSubsystem();
   m_OuttakeCommand = new OuttakeCommand(m_hopper, m_hopperToOuttakeSubsystem, m_outtakeSubsystem);
   controllerSwerve =  new TeleopSwerve(
           m_SwerveSubsystem,
@@ -155,6 +155,7 @@ public class RobotContainer {
     button2.onFalse(new InstantCommand(() -> m_intake.stopIntake()));
     button4.onTrue(new SequentialCommandGroup(new InstantCommand(() ->m_hopper.setHopperSpeed(0.3)),new InstantCommand(() -> m_hopperToOuttakeSubsystem.setHopperToOuttakeSpeed(-0.7))));
     button4.onFalse(new SequentialCommandGroup(new InstantCommand(() -> m_hopper.stopHopper()),new InstantCommand(() -> m_hopperToOuttakeSubsystem.stopHopperToOuttake())));
+    triButton.onTrue(new RunCommand(() -> vision.faceHub()).onlyWhile(triButton));
     // l1Button.onTrue(new InstantCommand(() -> m_intake.setIntakeSpeed(0.2)));
     // l1Button.onFalse(new InstantCommand(() -> m_intake.stopIntake()));
     // r1Button.onTrue(new InstantCommand(() -> m_hopper.setHopperSpeed(0.3)));
