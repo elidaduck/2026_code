@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkMax;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -14,6 +15,9 @@ public class HopperSubsystem extends SubsystemBase {
   /** Creates a new HopperSubsystem. */
   public HopperSubsystem() {
     topHopperMotor = new SparkMax(11, MotorType.kBrushless);
+    SparkMaxConfig hopperConfig = new SparkMaxConfig();
+    hopperConfig.smartCurrentLimit(40);
+    topHopperMotor.configure(hopperConfig, com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
   }
   public void setHopperSpeed(double speed){
     topHopperMotor.set(speed);

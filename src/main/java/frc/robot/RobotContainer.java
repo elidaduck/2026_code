@@ -28,7 +28,10 @@ import frc.robot.subsystems.OuttakeSubsystem;
 
 import frc.robot.subsystems.SwerveSubsystem;
 
+import static edu.wpi.first.units.Units.Newton;
+
 import java.util.List;
+import java.util.function.DoubleSupplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -88,6 +91,9 @@ public class RobotContainer {
   private final Trigger button7 = new JoystickButton(m_subsystemsController, 7);
   private final Trigger button8 = new JoystickButton(m_subsystemsController, 8);
   private final Trigger button9 = new JoystickButton(m_subsystemsController, 9);
+  private final Trigger button11 = new JoystickButton(m_subsystemsController, 11);
+
+
 
 
 
@@ -151,11 +157,14 @@ public class RobotContainer {
     button3.onTrue(new InstantCommand(() -> m_intakeExtentionSubsystem.setIntakeExtentionSpeed(-0.2)));
     button3.onFalse(new InstantCommand(() -> m_intakeExtentionSubsystem.stopIntake()));
     button1.onTrue(m_OuttakeCommand.onlyWhile(button1));
-    button2.onTrue(new InstantCommand(() -> m_intake.setIntakeSpeed(0.18)));
+    button2.onTrue(new InstantCommand(() -> m_intake.setIntakeSpeed(0.4)));
     button2.onFalse(new InstantCommand(() -> m_intake.stopIntake()));
-    button4.onTrue(new SequentialCommandGroup(new InstantCommand(() ->m_hopper.setHopperSpeed(0.3)),new InstantCommand(() -> m_hopperToOuttakeSubsystem.setHopperToOuttakeSpeed(-0.7))));
-    button4.onFalse(new SequentialCommandGroup(new InstantCommand(() -> m_hopper.stopHopper()),new InstantCommand(() -> m_hopperToOuttakeSubsystem.stopHopperToOuttake())));
-    triButton.onTrue(new RunCommand(() -> vision.faceHub()).onlyWhile(triButton));
+    button4.onTrue(new InstantCommand(() -> m_intake.setIntakeSpeed(1)));
+    button4.onFalse(new InstantCommand(() -> m_intake.stopIntake()));
+    button6.onTrue(new SequentialCommandGroup(new InstantCommand(() ->m_hopper.setHopperSpeed(0.3)),new InstantCommand(() -> m_hopperToOuttakeSubsystem.setHopperToOuttakeSpeed(-0.7)), new InstantCommand(() -> m_outtakeSubsystem.setOuttakeSpeed(1))));
+    button6.onFalse(new SequentialCommandGroup(new InstantCommand(() -> m_hopper.stopHopper()),new InstantCommand(() -> m_hopperToOuttakeSubsystem.stopHopperToOuttake()), new InstantCommand(() -> m_outtakeSubsystem.stopOuttake())));
+    triButton.onTrue(new RunCommand(() -> vision.faceTag()).onlyWhile(triButton));
+    button11.onTrue(new InstantCommand(() -> m_outtakeSubsystem.setOuttakeSpeed(0.58)));
     // l1Button.onTrue(new InstantCommand(() -> m_intake.setIntakeSpeed(0.2)));
     // l1Button.onFalse(new InstantCommand(() -> m_intake.stopIntake()));
     // r1Button.onTrue(new InstantCommand(() -> m_hopper.setHopperSpeed(0.3)));
@@ -177,13 +186,24 @@ public class RobotContainer {
    
   }
 
+  public Command driveAndShoot () {
+    return new SequentialCommandGroup(new RunCommand(() -> m_SwerveSubsystem.drive(new Translation2d(1, 0), 0, true, true)).withTimeout(2).andThen(m_OuttakeCommand));
+  }
+
+  public Command shootCommand() {
+    return new InstantCommand(() -> m_outtakeSubsystem.setOuttakeSpeed(0.60)).alongWith(new InstantCommand(() -> m_hopperToOuttakeSubsystem.setHopperToOuttakeSpeed(-0.8)).alongWith(new InstantCommand(()-> m_hopper.setHopperSpeed(-0.5))));
+  }
+
+
+
  
+
   public Command getAutonomousCommand() {
     // PathPlannerPath path = PathPlannerPath.fromPathFile("Back Left 45");
     // m_SwerveSubsystem.resetOdometry(path.getPreviewStartingHolonomicPose());
     // return AutoBuilder.followPath(path);
 
 
-    return nullAuto();
+    return shootCommand();
   }
 }

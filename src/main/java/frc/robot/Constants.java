@@ -84,8 +84,8 @@ public final class Constants {
     public static final double voltageComp = 12.0;
        
     //Swerve Current Limiting for neos
-    public static final int angleContinuousCurrentLimit = 20; //limits current draw of turning motor
-    public static final int driveContinuousCurrentLimit = 80; //limits current draw of drive motor
+    public static final int angleContinuousCurrentLimit = 40; //limits current draw of turning motor
+    public static final int driveContinuousCurrentLimit = 40; //limits current draw of drive motor
   
 
 

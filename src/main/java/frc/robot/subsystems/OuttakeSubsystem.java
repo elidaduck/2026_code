@@ -2,6 +2,8 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.spark.SparkMax;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -88,11 +90,21 @@ public class OuttakeSubsystem extends SubsystemBase {
 
   // -------------------------------------------------------------------------
 
-  private final SparkMax outtakeMotor;
+  private final TalonFX outtakeMotor;
 
   /** Creates a new OuttakeSubsystem. */
   public OuttakeSubsystem() {
-    outtakeMotor = new SparkMax(14, MotorType.kBrushless);
+    outtakeMotor = new TalonFX(14);
+    var krakenConfigurator = outtakeMotor.getConfigurator();
+    var limitsConfig = new CurrentLimitsConfigs();
+
+    limitsConfig.StatorCurrentLimit = 40;
+    limitsConfig.StatorCurrentLimitEnable = true;
+
+    limitsConfig.SupplyCurrentLimit = 35;
+    limitsConfig.SupplyCurrentLimitEnable = true;
+
+    krakenConfigurator.apply(limitsConfig);
   }
 
   /**
@@ -156,7 +168,7 @@ public class OuttakeSubsystem extends SubsystemBase {
     if (Double.isNaN(distToTag)) {
       // No valid Limelight target — don't fire.
       SmartDashboard.putString("Shooter State", "No LL target");
-      return Double.NaN;
+      return 0.75;
     }
 
     // The tag sits on the outer face of the hub. The scoring opening is

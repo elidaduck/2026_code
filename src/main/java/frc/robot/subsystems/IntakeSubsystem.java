@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -14,7 +15,11 @@ public class IntakeSubsystem extends SubsystemBase {
   /** Creates a new IntakeSubsystem. */
   public IntakeSubsystem() {
     intakeMotor = new SparkMax(10, MotorType.kBrushless);
+    SparkMaxConfig hopperConfig = new SparkMaxConfig();
+    hopperConfig.smartCurrentLimit(40);
+    intakeMotor.configure(hopperConfig, com.revrobotics.ResetMode.kResetSafeParameters, com.revrobotics.PersistMode.kPersistParameters);
   }
+  
   public void setIntakeSpeed(double speed){
     intakeMotor.set(speed);
   }

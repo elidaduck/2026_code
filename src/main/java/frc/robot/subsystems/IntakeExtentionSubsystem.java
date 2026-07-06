@@ -43,6 +43,7 @@ public class IntakeExtentionSubsystem extends SubsystemBase {
     IntakeExtentionConfig.encoder.positionConversionFactor(Constants.intakeGearRatio);
     intakeextentionPIDController = intakeExtentionMotor.getClosedLoopController();
     extentionEncoder = intakeExtentionMotor.getEncoder();
+    IntakeExtentionConfig.smartCurrentLimit(40);
     intakeExtentionMotor.configure(IntakeExtentionConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     
 

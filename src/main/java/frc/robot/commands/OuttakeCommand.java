@@ -34,16 +34,18 @@ public class OuttakeCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_HopperSubsystem.setHopperSpeed(0.3);
-    if(tick < 5) {
-      m_HopperToOuttakeSubsystem.setHopperToOuttakeSpeed(-0.8);
-      tick++;
+    tick++;
+    if (tick < 100) {
+      m_HopperSubsystem.setHopperSpeed(-1);
     } else {
-      m_HopperToOuttakeSubsystem.stopHopperToOuttake();
-      tick = 0;
+      m_HopperSubsystem.setHopperSpeed(0.4);
+      if (tick == 125) {
+        tick = 0;
+      }
     }
-    m_OuttakeSubsystem.setOuttakeSpeed(0.75);
-  }
+    m_HopperToOuttakeSubsystem.setHopperToOuttakeSpeed(-0.8);
+    m_OuttakeSubsystem.setOuttakeSpeed(0.61);
+  }   
 
   // Called once the command ends or is interrupted.
   @Override

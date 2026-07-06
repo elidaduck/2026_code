@@ -167,7 +167,7 @@ public class SwerveModule {
         if (isOpenLoop) {
             // when not taking feedback
             double percentOutput = desiredState.speedMetersPerSecond / Constants.SwerveConstants.maxSpeed;
-            driveMotor.set(percentOutput);
+            driveMotor.set(4*percentOutput/5);
         } else {
             driveController.setSetpoint(
                     desiredState.speedMetersPerSecond,
